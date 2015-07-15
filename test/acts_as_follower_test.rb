@@ -22,6 +22,8 @@ class ActsAsFollowerTest < ActiveSupport::TestCase
       @sam = FactoryGirl.create(:sam)
       @jon = FactoryGirl.create(:jon)
       @oasis = FactoryGirl.create(:oasis)
+      @tom = FactoryGirl.create(:tom)
+      @joe = FactoryGirl.create(:joe)
       @sam.follow(@jon)
       @sam.follow(@oasis)
     end
@@ -38,12 +40,37 @@ class ActsAsFollowerTest < ActiveSupport::TestCase
       end
     end
 
+    context "unfollowed" do
+      setup do
+        @tom.follow(@joe)
+        @tom.stop_following(@joe)
+      end
+
+      should "joe is followed by tom before" do
+        assert_equal true, @tom.unfollowed?(@joe)
+      end
+
+      should "tom haven't been followed by joe before" do
+        assert_equal false, @joe.unfollowed?(@tom)
+      end
+    end
+
+    context "follow after stop_following" do
+      setup do
+        @sam.stop_following(@jon)
+        @sam.follow(@jon)
+      end
+
+      should "sam follow jon" do
+        assert_equal true, @sam.following?(@jon)
+      end
+    end
+
     context "follow a friend" do
       setup do
         @jon.follow(@sam)
       end
 
-      should_change("Follow count", :by => 1) { Follow.count }
       should_change("@jon.follow_count", :by => 1) { @jon.follow_count }
 
       should "set the follower" do
@@ -60,7 +87,6 @@ class ActsAsFollowerTest < ActiveSupport::TestCase
         @jon.follow(@jon)
       end
 
-      should_not_change("Follow count") { Follow.count }
       should_not_change("@jon.follow_count") { @jon.follow_count }
 
       should "not set the follower" do
@@ -77,7 +103,6 @@ class ActsAsFollowerTest < ActiveSupport::TestCase
         @sam.stop_following(@jon)
       end
 
-      should_change("Follow count", :by => -1) { Follow.count }
       should_change("@sam.follow_count", :by => -1) { @sam.follow_count }
     end
 

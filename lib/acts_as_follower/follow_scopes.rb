@@ -34,5 +34,8 @@ module ActsAsFollower #:nodoc:
       where(:blocked => true)
     end
 
+    def status
+      where(:status => true)
+    end
   end
 end
