@@ -17,7 +17,7 @@ module ActsAsFollower #:nodoc:
 
       # Returns the number of followers a record has.
       def followers_count
-        self.followings.unblocked.count
+        self.followings.status.unblocked.count
       end
 
       # Returns the followers by a given type

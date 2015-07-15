@@ -18,12 +18,23 @@ class ActsAsFollowableTest < ActiveSupport::TestCase
     setup do
       @sam = FactoryGirl.create(:sam)
       @jon = FactoryGirl.create(:jon)
+      @tom = FactoryGirl.create(:tom)
+      @joe = FactoryGirl.create(:joe)
       @oasis = FactoryGirl.create(:oasis)
       @metallica = FactoryGirl.create(:metallica)
       @sam.follow(@jon)
     end
 
     context "followers_count" do
+      setup do
+        @tom.follow(@joe)
+        @tom.stop_following(@joe)
+      end
+
+      should "return the number of followers after stop_following" do
+        assert_equal 0, @joe.followers_count
+      end
+
       should "return the number of followers" do
         assert_equal 0, @sam.followers_count
         assert_equal 1, @jon.followers_count
