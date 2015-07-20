@@ -4,10 +4,9 @@ module ActsAsFollower
     private
 
     # Retrieves the parent class name if using STI.
+    # We have NeoSQL as superclass.
+    # This might break STI support.
     def parent_class_name(obj)
-      if obj.class.superclass != ActiveRecord::Base
-        return obj.class.superclass.name
-      end
       return obj.class.name
     end
 

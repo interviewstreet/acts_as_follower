@@ -16,8 +16,14 @@ module ActsAsFollower #:nodoc:
     module InstanceMethods
 
       # Returns true if this instance is following the object passed as an argument.
-      def following?(followable)
-        follow = Follow.unblocked.for_follower(self).for_followable(followable).first
+      def following?(*args)
+        if args.size == 2
+          type, id = args[0], args[1]
+          follow = Follow.unblocked.for_follower(self).where(followable_type: type, followable_id: id).first
+        elsif args.size == 1
+          followable = args[0]
+          follow = Follow.unblocked.for_follower(self).for_followable(followable).first
+        end
         return follow[:status] if follow
         false
       end
@@ -53,7 +59,7 @@ module ActsAsFollower #:nodoc:
 
       # returns the follows records to the current instance
       def follows_scoped
-        self.follows.unblocked.includes(:followable)
+        self.follows.unblocked.status.includes(:followable)
       end
 
       # Returns the follow records related to this instance by type.
@@ -77,12 +83,16 @@ module ActsAsFollower #:nodoc:
       def following_by_type(followable_type, options={})
         followables = followable_type.constantize.
           joins(:followings).
-          where('follows.blocked'         => false,
+          where('follows.status'          => true,
+                'follows.blocked'         => false,
                 'follows.follower_id'     => self.id,
                 'follows.follower_type'   => parent_class_name(self),
                 'follows.followable_type' => followable_type)
         if options.has_key?(:limit)
           followables = followables.limit(options[:limit])
+        end
+        if options.has_key?(:offset)
+          followables = followables.offset(options[:offset])
         end
         if options.has_key?(:includes)
           followables = followables.includes(options[:includes])
@@ -91,7 +101,7 @@ module ActsAsFollower #:nodoc:
       end
 
       def following_by_type_count(followable_type)
-        follows.unblocked.for_followable_type(followable_type).count
+        follows.unblocked.status.for_followable_type(followable_type).count
       end
 
       # Allows magic names on following_by_type
@@ -114,7 +124,7 @@ module ActsAsFollower #:nodoc:
 
       # Returns a follow record for the current instance and followable object.
       def get_follow(followable)
-        self.follows.unblocked.for_followable(followable).first
+        self.follows.unblocked.status.for_followable(followable).first
       end
 
     end
