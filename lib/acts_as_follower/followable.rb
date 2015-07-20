@@ -24,12 +24,16 @@ module ActsAsFollower #:nodoc:
       def followers_by_type(follower_type, options={})
         follows = follower_type.constantize.
           joins(:follows).
-          where('follows.blocked'         => false,
+          where('follows.status'          => true,
+                'follows.blocked'         => false,
                 'follows.followable_id'   => self.id,
                 'follows.followable_type' => parent_class_name(self),
                 'follows.follower_type'   => follower_type)
         if options.has_key?(:limit)
           follows = follows.limit(options[:limit])
+        end
+        if options.has_key?(:offset)
+          follows = follows.offset(options[:offset])
         end
         if options.has_key?(:includes)
           follows = follows.includes(options[:includes])
@@ -38,7 +42,7 @@ module ActsAsFollower #:nodoc:
       end
 
       def followers_by_type_count(follower_type)
-        self.followings.unblocked.for_follower_type(follower_type).count
+        self.followings.status.unblocked.for_follower_type(follower_type).count
       end
 
       # Allows magic names on followers_by_type
@@ -65,7 +69,7 @@ module ActsAsFollower #:nodoc:
 
       # Returns the followings records scoped
       def followers_scoped
-        self.followings.includes(:follower)
+        self.followings.status.includes(:follower)
       end
 
       def followers(options={})
@@ -82,8 +86,14 @@ module ActsAsFollower #:nodoc:
 
       # Returns true if the current instance is followed by the passed record
       # Returns false if the current instance is blocked by the passed record or no follow is found
-      def followed_by?(follower)
-        self.followings.unblocked.for_follower(follower).first.present?
+      def followed_by?(*args)
+        if args.size == 2
+          type, id = args[0], args[1]
+          self.followings.unblocked.where(follower_type: type, follower_id: id).exists?
+        elsif args.size == 1
+          follower = args[0]
+          self.followings.unblocked.for_follower(follower).exists?
+        end
       end
 
       def block(follower)
@@ -95,7 +105,7 @@ module ActsAsFollower #:nodoc:
       end
 
       def get_follow_for(follower)
-        self.followings.for_follower(follower).first
+        self.followings.status.for_follower(follower).first
       end
 
       private
