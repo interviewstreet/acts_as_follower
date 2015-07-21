@@ -32,6 +32,8 @@ class ActsAsFollowerTest < ActiveSupport::TestCase
       should "return following_status" do
         assert_equal true, @sam.following?(@jon)
         assert_equal false, @jon.following?(@sam)
+        assert_equal true, @sam.following?(@jon.class, @jon.id)
+        assert_equal false, @jon.following?(@sam.class, @sam.id)
       end
 
       should "return follow_count" do

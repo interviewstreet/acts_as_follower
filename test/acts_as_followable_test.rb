@@ -83,6 +83,8 @@ class ActsAsFollowableTest < ActiveSupport::TestCase
       should "return_follower_status" do
         assert_equal true, @jon.followed_by?(@sam)
         assert_equal false, @sam.followed_by?(@jon)
+        assert_equal true, @jon.followed_by?(@sam.class, @sam.id)
+        assert_equal false, @sam.followed_by?(@jon.class, @jon.id)
       end
     end
 

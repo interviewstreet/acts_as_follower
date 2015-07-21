@@ -12,10 +12,10 @@ FactoryGirl.define do
   end
 
   factory :tom, :class => User do |u|
-  	u.name 'Tom'
+    u.name 'Tom'
   end
 
   factory :joe, :class => User do |u|
-  	u.name 'Joe'
+    u.name 'Joe'
   end
 end
