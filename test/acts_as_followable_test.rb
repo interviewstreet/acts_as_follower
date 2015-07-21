@@ -2,18 +2,6 @@ require File.dirname(__FILE__) + '/test_helper'
 
 class ActsAsFollowableTest < ActiveSupport::TestCase
 
-  context "instance methods" do
-    setup do
-      @sam = FactoryGirl.create(:sam)
-    end
-
-    should "be defined" do
-      assert @sam.respond_to?(:followers_count)
-      assert @sam.respond_to?(:followers)
-      assert @sam.respond_to?(:followed_by?)
-    end
-  end
-
   context "acts_as_followable" do
     setup do
       @sam = FactoryGirl.create(:sam)
@@ -262,17 +250,6 @@ class ActsAsFollowableTest < ActiveSupport::TestCase
       should "not count blocked follows in the count" do
         @oasis.block(@sam)
         assert_equal 1, @oasis.count_user_followers
-      end
-    end
-
-    context "respond_to?" do
-      should "advertise that it responds to following methods" do
-        assert @oasis.respond_to?(:user_followers)
-        assert @oasis.respond_to?(:user_followers_count)
-      end
-
-      should "return false when called with a nonexistent method" do
-        assert (not @oasis.respond_to?(:foobar))
       end
     end
 

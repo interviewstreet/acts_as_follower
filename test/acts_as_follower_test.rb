@@ -2,21 +2,6 @@ require File.dirname(__FILE__) + '/test_helper'
 
 class ActsAsFollowerTest < ActiveSupport::TestCase
 
-  context "instance methods" do
-    setup do
-      @sam = FactoryGirl.create(:sam)
-    end
-
-    should "be defined" do
-      assert @sam.respond_to?(:following?)
-      assert @sam.respond_to?(:follow_count)
-      assert @sam.respond_to?(:follow)
-      assert @sam.respond_to?(:stop_following)
-      assert @sam.respond_to?(:follows_by_type)
-      assert @sam.respond_to?(:all_follows)
-    end
-  end
-
   context "acts_as_follower" do
     setup do
       @sam = FactoryGirl.create(:sam)
@@ -161,12 +146,8 @@ class ActsAsFollowerTest < ActiveSupport::TestCase
         assert_equal [], @jon.all_following
       end
 
-      should "accept AR limit option" do
+      should "accept AR option" do
         assert_equal 1, @sam.all_following(:limit => 1).count
-      end
-
-      should "accept AR where option" do
-        assert_equal 1, @sam.all_following(:where => { :id => @oasis.id }).count
       end
     end
 
@@ -201,17 +182,6 @@ class ActsAsFollowerTest < ActiveSupport::TestCase
 
       should "raise on no method" do
         assert_raises (NoMethodError){ @sam.foobar }
-      end
-    end
-
-    context "respond_to?" do
-      should "advertise that it responds to following methods" do
-        assert @sam.respond_to?(:following_users)
-        assert @sam.respond_to?(:following_users_count)
-      end
-
-      should "return false when called with a nonexistent method" do
-        assert (not @sam.respond_to?(:foobar))
       end
     end
 

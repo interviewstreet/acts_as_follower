@@ -42,7 +42,7 @@ module ActsAsFollower #:nodoc:
       # Does not allow duplicate records to be created.
       def follow(followable)
         if self != followable
-          follow = self.follows.find_or_create_by(followable_id: followable.id, followable_type: parent_class_name(followable))
+          follow = self.follows.find_or_create_by_followable_id_and_followable_type(followable.id, parent_class_name(followable))
           follow[:status] = true
           follow.save!
           follow
@@ -57,21 +57,14 @@ module ActsAsFollower #:nodoc:
         end
       end
 
-      # returns the follows records to the current instance
-      def follows_scoped
-        self.follows.unblocked.status.includes(:followable)
-      end
-
       # Returns the follow records related to this instance by type.
       def follows_by_type(followable_type, options={})
-        follows_scope = follows_scoped.for_followable_type(followable_type)
-        follows_scope = apply_options_to_scope(follows_scope, options)
+        self.follows.unblocked.status.includes(:followable).for_followable_type(followable_type).all(options)    
       end
 
       # Returns the follow records related to this instance with the followable included.
       def all_follows(options={})
-        follows_scope = follows_scoped
-        follows_scope = apply_options_to_scope(follows_scope, options)
+        self.follows.unblocked.status.includes(:followable).all(options)
       end
 
       # Returns the actual records which this instance is following.
