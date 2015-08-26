@@ -30,7 +30,7 @@ module ActsAsFollower #:nodoc:
 
       # Returns true if this instance is unfollowed the object passed as an argument.
       def unfollowed?(followable)
-        0 < Follow.unblocked.for_follower(self).for_followable(followable).count
+        0 < Follow.unblocked.unscoped.for_follower(self).for_followable(followable).count
       end
 
       # Returns the number of objects this instance is following.
