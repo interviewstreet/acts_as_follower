@@ -22,13 +22,15 @@ module ActsAsFollower #:nodoc:
 
       # Returns the followers by a given type
       def followers_by_type(follower_type, options={})
+        table_name = Follow.table_name
         follows = follower_type.constantize.
           joins(:follows).
-          where('follows.status'          => true,
-                'follows.blocked'         => false,
-                'follows.followable_id'   => self.id,
-                'follows.followable_type' => parent_class_name(self),
-                'follows.follower_type'   => follower_type)
+          # because of default_scope, but we should not use default_scope
+          where( # "#{table_name}.status"          => true,
+                "#{table_name}.blocked"         => false,
+                "#{table_name}.followable_id"   => self.id,
+                "#{table_name}.followable_type" => parent_class_name(self),
+                "#{table_name}.follower_type"   => follower_type)
         if options.has_key?(:limit)
           follows = follows.limit(options[:limit])
         end
