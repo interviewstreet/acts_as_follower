@@ -30,19 +30,24 @@ module ActsAsFollower #:nodoc:
 
       # Returns true if this instance is unfollowed the object passed as an argument.
       def unfollowed?(followable)
-        0 < Follow.unblocked.unscoped.for_follower(self).for_followable(followable).count
+        0 < Follow.unscoped.unblocked.for_follower(self).for_followable(followable).count
       end
 
       # Returns the number of objects this instance is following.
       def follow_count
-        Follow.unblocked.status.for_follower(self).count
+        Follow.unblocked.for_follower(self).count
       end
 
       # Creates a new follow record for this instance to follow the passed object.
       # Does not allow duplicate records to be created.
       def follow(followable)
         if self != followable
-          follow = self.follows.find_or_create_by(followable_id: followable.id, followable_type: parent_class_name(followable))
+          follow = self.follows.unscoped.find_or_create_by(
+            follower_id: self.id,
+            follower_type: parent_class_name(self),
+            followable_id: followable.id,
+            followable_type: parent_class_name(followable)
+          )
           follow[:status] = true
           follow.save!
           follow
@@ -59,7 +64,7 @@ module ActsAsFollower #:nodoc:
 
       # returns the follows records to the current instance
       def follows_scoped
-        self.follows.unblocked.status.includes(:followable)
+        self.follows.unblocked.includes(:followable)
       end
 
       # Returns the follow records related to this instance by type.
@@ -103,7 +108,7 @@ module ActsAsFollower #:nodoc:
       end
 
       def following_by_type_count(followable_type)
-        follows.unblocked.status.for_followable_type(followable_type).count
+        follows.unblocked.for_followable_type(followable_type).count
       end
 
       # Allows magic names on following_by_type
@@ -126,7 +131,7 @@ module ActsAsFollower #:nodoc:
 
       # Returns a follow record for the current instance and followable object.
       def get_follow(followable)
-        self.follows.unblocked.status.for_followable(followable).first
+        self.follows.unblocked.for_followable(followable).first
       end
 
     end

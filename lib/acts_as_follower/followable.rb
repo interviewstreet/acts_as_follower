@@ -17,7 +17,7 @@ module ActsAsFollower #:nodoc:
 
       # Returns the number of followers a record has.
       def followers_count
-        self.followings.status.unblocked.count
+        self.followings.unblocked.count
       end
 
       # Returns the followers by a given type
@@ -44,7 +44,7 @@ module ActsAsFollower #:nodoc:
       end
 
       def followers_by_type_count(follower_type)
-        self.followings.status.unblocked.for_follower_type(follower_type).count
+        self.followings.unblocked.for_follower_type(follower_type).count
       end
 
       # Allows magic names on followers_by_type
@@ -66,12 +66,12 @@ module ActsAsFollower #:nodoc:
       end
 
       def blocked_followers_count
-        self.followings.blocked.count
+        self.followings.unscoped.for_followable(self).blocked.count
       end
 
       # Returns the followings records scoped
       def followers_scoped
-        self.followings.status.includes(:follower)
+        self.followings.includes(:follower)
       end
 
       def followers(options={})
@@ -107,13 +107,13 @@ module ActsAsFollower #:nodoc:
       end
 
       def get_follow_for(follower)
-        self.followings.status.for_follower(follower).first
+        self.followings.unscoped.for_followable(self).for_follower(follower).first
       end
 
       private
 
       def block_future_follow(follower)
-        Follow.create(:followable => self, :follower => follower, :blocked => true)
+        Follow.create(:followable => self, :follower => follower, :blocked => true, :status => true)
       end
 
       def block_existing_follow(follower)
